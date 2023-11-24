@@ -1,13 +1,19 @@
 from moviepy.editor import *
 from telegram import Update, InputMediaVideo
 from telegram.ext import CallbackContext
+import requests
+import asyncio, aiofiles
+
 
 async def start(update: Update, context: CallbackContext):
     await update.message.reply_text("Отправьте мне видео, и я преобразую его в видеокружок.")
 
 async def process_video(update: Update, context: CallbackContext):
     video_file = await context.bot.getFile(update.message.video.file_id)
-    await video_file.download("input_video.mp4")
+    url = video_file.file_path
+    rsp = requests.get(url=url)
+    async with aiofiles.open('input_video.mp4', 'wb') as f:
+        await f.write(rsp.content)
 
     # Prеобразование видео в видеокружок
     input_video = VideoFileClip("input_video.mp4")
